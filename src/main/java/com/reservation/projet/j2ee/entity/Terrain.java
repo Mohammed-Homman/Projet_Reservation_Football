@@ -14,11 +14,11 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Terrain")
+@Table(name = "terrain")
 public class Terrain {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_terrain;
+    private Long id;
     private String nom;
     private String adresse;
     private String description;
@@ -28,8 +28,5 @@ public class Terrain {
     @OneToMany(mappedBy = "terrain", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> reservations = new ArrayList<>();
 
-    @JsonManagedReference // Pour éviter une boucle infinie lors de la sérialisation
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_horaire")
-    private Horaire horaire; // Lien vers l'horaire spécifique pour ce terrain
+
 }

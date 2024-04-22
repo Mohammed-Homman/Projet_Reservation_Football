@@ -1,6 +1,7 @@
 package com.reservation.projet.j2ee.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.reservation.projet.j2ee.entity.Utilisateur;
 import com.reservation.projet.j2ee.service.UtilisateurService;
@@ -13,30 +14,47 @@ public class UtilisateurController {
     @Autowired
     private UtilisateurService utilisateurService;
 
+    // Retrieve all users
     @GetMapping
     public List<Utilisateur> getAllUsers() {
         return utilisateurService.getAllUsers();
     }
 
+    // Retrieve user by ID
     @GetMapping("/{userId}")
-    public Utilisateur getUserById(@PathVariable Long userId) {
+    public ResponseEntity<Utilisateur> getUserById(@PathVariable Long userId) {
         return utilisateurService.getUserById(userId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + userId));
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/verifier")
+    public Utilisateur login(@RequestBody Utilisateur utilisateur) {
+        // Vérification des informations de connexion
+        Utilisateur user = utilisateurService.authenticate(utilisateur.getEmail(), utilisateur.getPassword());
+        if (user!=null) {
+
+            return user;
+        } else {
+            return null;
+        }
+    }
+  @PostMapping
     public Utilisateur createUser(@RequestBody Utilisateur user) {
         return utilisateurService.createUser(user);
     }
 
+    // Update an existing user
     @PutMapping("/{userId}")
-    public Utilisateur updateUser(@PathVariable Long userId, @RequestBody Utilisateur user) {
+    public ResponseEntity<Utilisateur> updateUser(@PathVariable Long userId, @RequestBody Utilisateur user) {
         user.setId(userId);
-        return utilisateurService.updateUser(user);
+        return ResponseEntity.ok(utilisateurService.updateUser(user));
     }
 
+    // Delete a user
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         utilisateurService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
     }
 }
