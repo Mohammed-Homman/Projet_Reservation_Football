@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,14 +26,20 @@ public class ReservationController {
     public ReservationService reservationService;
 
     @PostMapping("/search")
-    public List<Reservation> getAllReservationByDateTerrain(@RequestBody Map<String, Object> request) {
+    public List<String> getAllReservationByDateTerrain(@RequestBody Map<String, Object> request) {
         // Extract date_reservation and id_terrain from the request body
+        List<String> datesReserver = new ArrayList<>();
         String date_reservation = (String) request.get("date_reservation");
         Long id_terrain = ((Number) request.get("id_terrain")).longValue(); // Convertir en Long
         // Vérification des informations de connexion
         List<Reservation> reservations = reservationService.authenticate(date_reservation, id_terrain);
         if (reservations != null) {
-            return reservations;
+            for (Reservation r: reservations){
+                datesReserver.add(r.getHeure_reservation()) ;
+
+            }
+            return datesReserver;
+
         } else {
             return null;
         }
@@ -45,7 +52,7 @@ public class ReservationController {
         return ResponseEntity.ok().body(reservations);
     }
 
-    @PostMapping
+    @PostMapping("/validate")
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
         try {
             Reservation createdReservation = reservationService.createReservation(reservation);
